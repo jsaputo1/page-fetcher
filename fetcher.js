@@ -37,6 +37,8 @@ const fetcher = function (url, localPath) {
               }
             );
             return;
+          } else {
+            return err;
           }
         }
         path = localPath;
