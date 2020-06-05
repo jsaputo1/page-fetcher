@@ -5,50 +5,50 @@ const request = require("request");
 const fs = require("fs");
 const readline = require("readline");
 
-const fetcher = function (url, localPath) {
+const fetcher = (url, localPath) => {
   request(url, (error, response, body) => {
     if (error) {
       return console.log("error:", error);
     } else if (response.statusCode !== 200) {
       return console.log("statusCode:", response && response.statusCode);
     } else {
-      fs.writeFile(localPath, body, { flag: "wx" }, function (err) {
+      fs.writeFile(localPath, body, (err) => {
         if (err) {
           if (err.code === "ENOENT") {
             return console.log("Invalid file path");
-          } else if (err.code === "EEXIST") {
-            const rl = readline.createInterface({
-              input: process.stdin,
-              output: process.stdout,
-            });
-            rl.question(
-              "File already exists. To overwrite type Y then enter \n",
-              (answer) => {
-                if (answer === "Y") {
-                  path = localPath;
-                  const stat = fs.statSync(path);
-                  const size = stat.size;
-                  console.log(`Downloaded and saved ${size} bytes to ${path}`);
-                  rl.close();
-                } else {
-                  console.log("You did not enter the right key");
-                  rl.close();
-                }
-              }
-            );
-            return;
-          } else {
-            return err;
-          }
+          } else return err;
         }
-        path = localPath;
-        const stat = fs.statSync(path);
-        const size = stat.size;
-        console.log(`Downloaded and saved ${size} bytes to ${path}`);
+        if (fs.existsSync(localPath)) {
+          const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+          });
+          rl.question(
+            "File already exists. To overwrite type Y then enter \n",
+            (answer) => {
+              if (answer === "Y") {
+                writeFile();
+                rl.close();
+              } else {
+                console.log("You did not enter the right key");
+                rl.close();
+              }
+            }
+          );
+          return;
+        }
+        writeFile();
         return;
       });
     }
   });
+};
+
+const writeFile = () => {
+  path = localPath;
+  const stat = fs.statSync(path);
+  const size = stat.size;
+  console.log(`Downloaded and saved ${size} bytes to ${path}`);
 };
 
 fetcher(url, localPath);
